@@ -12,7 +12,7 @@ function Y = rowdec(X, h)
 m = length(h);
 m2 = fix(m/2);
 
-if rem(m,2) > 0,
+if rem(m,2) > 0
 % Odd h: symmetrically extend indices without repeating end samples.
   xe = [(m2+1:-1:2)  (1:c)  (c-(1:m2))];
 else
@@ -24,7 +24,7 @@ t = 0:2:(c-1);
 
 Y = zeros(r,length(t));
 % Loop for each term in h.
-for i=1:m,
+for i=1:m
   Y = Y + h(i) * X(:,xe(t+i));
 end
 

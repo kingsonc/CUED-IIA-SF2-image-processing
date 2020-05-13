@@ -11,16 +11,16 @@ end
 draw(Xf);
 
 %% conv2 with `same` argument
-Xf = conv2(1, h, X, 'same');
+Xf = conv2(h, h, X, 'same');
 
-draw(Xf);
+draw(Xf);set(gcf, 'Position',  [0, 0, 256, 256])
 %% filter row then col
 Y_rc = conv2se(h,h,X')';
-draw(Y_rc);
+draw(Y_rc);set(gcf, 'Position',  [0, 0, 256, 256])
 
 %% filter col then row
 Y_cr = conv2se(h,h,X);
-draw(Y_cr);
+draw(Y_cr);set(gcf, 'Position',  [0, 0, 256, 256])
 
 %% max absolute pixel difference
 max_abs_diff = max(abs(Y_rc - Y_cr),[],'all');
@@ -29,8 +29,8 @@ disp(max_abs_diff);
 %% high pass filter
 Z = conv2se(h,h,X);  % low pass image
 Y = X - Z;  % image - low pass = high pass
-draw(Y);
+draw(Y);set(gcf, 'Position',  [0, 0, 256, 256])
 
 %% energy content
-E = sum(Z(:).^2);
+E = sum(Y(:).^2);
 disp(E);

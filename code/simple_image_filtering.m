@@ -14,6 +14,7 @@ draw(Xf);
 Xf = conv2(h, h, X, 'same');
 
 draw(Xf);set(gcf, 'Position',  [0, 0, 256, 256])
+
 %% filter row then col
 Y_rc = conv2se(h,h,X')';
 draw(Y_rc);set(gcf, 'Position',  [0, 0, 256, 256])

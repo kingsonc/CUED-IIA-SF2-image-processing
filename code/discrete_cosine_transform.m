@@ -1,16 +1,17 @@
 %% DCT
-N = 8;
+N = 16;
 C = dct_ii(N);
 % plot(C8');
 
 Y = colxfm(colxfm(X-128,C)',C)';
-% draw(regroup(Y,N)/N);
+draw(regroup(Y,N)/N); set(gcf, 'Position',  [0, 0, 256, 256])
 
 %% energies of sub-images
-R = regroup(Y,N);
+R = regroup(Y,N)/N;
 
-f = 8;
-E = sum(R(f:32*f,f:32*f).^2, 'all');
+f = 6;
+R = R(32*(f-1)+1:32*f,32*(f-1)+1:32*f);
+E = sum(R.^2, 'all');
 disp(E);
 
 %% inverse DCT
@@ -21,14 +22,14 @@ max_abs_diff = max(abs(Z - X + 128),[],'all');
 disp(max_abs_diff);
 
 %% basis functions
-bases = [zeros(1,8); C8'; zeros(1,8)]; 
-draw(255*bases(:)*bases(:)');
+bases = [zeros(1,8); C'; zeros(1,8)];
+draw(512*bases(:)*bases(:)');
 
 %% quantisation
 Y = colxfm(colxfm(X-128,C)',C)';
 Yq = quantise(Y, 17);
 Yr = regroup(Yq,N);
-% draw(Yr/N);
+draw(Yr/N);
 
 bits = dctbpp(Yr, N);
 disp(bits);
@@ -42,7 +43,7 @@ rms_err = std(X(:) - Z(:));
 disp(rms_err);
 
 Xq = quantise(X, 17);
-rms_err = std(Xq(:) - Z(:));
+rms_err = std(X(:) - Xq(:));
 disp(rms_err);
 
 %% optimise step size
@@ -67,6 +68,7 @@ disp(best_step_size);
 %% compression ratio
 Yq = quantise(Y, best_step_size);
 Yr = regroup(Yq,N);
+draw(Yr);
 
 bits = dctbpp(Yr, N);
 disp(bits);
@@ -75,14 +77,14 @@ disp(bits);
 % DCT compressed
 Z = colxfm(colxfm(Yq',C')',C');
 figure(1);
-draw(Z);
+draw(Z); set(gcf, 'Position',  [0, 0, 256, 256])
 
-% direct quant
-Xq = quantise(X, 17);
-figure(2);
-draw(Xq);
-
-% original
-figure(3);
-draw(X);
+% % direct quant
+% Xq = quantise(X, 17);
+% figure(2);
+% draw(Xq);
+% 
+% % original
+% figure(3);
+% draw(X);
 

@@ -101,13 +101,18 @@ Y = zeros(256,256);
 % Y(6,2) = 100;
 % Y(6,6) = 100;
 
-Z = nlevidwt(Y, 6);
+% layer 7
+% Y(1,3) = 100;
+% Y(3,1) = 100;
+% Y(3,3) = 100;
+
+Z = nlevidwt(Y, 7);
 sqrt(sum(Z(:).^2))
 
 %% quantise
-N = 4;
+N = 7;
 Y = nlevdwt(X-128, N);
-[Yq, dwtent] = quantdwt(Y, N, 0.05);
+[Yq, ~] = quantdwt(Y, N, 0.05);
 
 Z = nlevidwt(Yq, N);
 draw(Z);
@@ -119,29 +124,35 @@ max_abs_diff = max(abs(X - Z - 128),[],'all');
 disp(max_abs_diff);
 
 %% optimal
-N = 4;
+N = 7;
 Y = nlevdwt(X-128, N);
 
-direct_quant_rms_err = 4.9340;
+direct_quant_rms_err = 4.8759;  % bridge
+% direct_quant_rms_err = 4.9340;  % lighthouse
 best_diff_rms_err = 100;
 best_step_size_scaling = 0;
-% for step_size_scaling = 0.01:0.01:2  % equal MSE
-for step_size_scaling = 5:0.01:15  % equal MSE
-    [Yq, ~, ~] = quantdwt(Y, N, step_size_scaling);
+best_bits = 0;
+% for step_size_scaling = 0.2:0.001:0.4  % equal MSE
+for step_size_scaling = 3:0.01:8  % constant step size
+    [Yq, ~, bits] = quantdwt(Y, N, step_size_scaling);
     Z = nlevidwt(Yq, N);
 
     rms_err = std(X(:) - Z(:));
     if abs(rms_err - direct_quant_rms_err) < best_diff_rms_err
         best_diff_rms_err = abs(rms_err - direct_quant_rms_err);
         best_step_size_scaling = step_size_scaling;
+        best_bits = bits;
     end
 end
 
 disp(best_diff_rms_err);
 disp(best_step_size_scaling);
+disp(best_bits);
 
 %% draw optimal
-[Yq, dwtent, bits] = quantdwt(Y, N, best_step_size_scaling);
+N = 5;
+Y = nlevdwt(X-128, N);
+[Yq, dwtent, bits] = quantdwt(Y, N, 5.75);
 Z = nlevidwt(Yq, N);
-draw(Z);
+draw(Z);set(gcf, 'Position',  [0, 0, 256, 256])
 disp(bits);

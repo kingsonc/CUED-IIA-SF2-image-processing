@@ -1,5 +1,5 @@
-% h = [1 2 1] / 4;
-h = [1 4 6 4 1] / 16;
+h = [1 2 1] / 4;
+% h = [1 4 6 4 1] / 16;
 
 %% entropies
 bpp(quantise(X, 17))
@@ -52,6 +52,7 @@ disp(rms_err);
 Xq = quantise(X, 17);
 rms_err = std(X(:) - Xq(:));
 disp(rms_err);
+length(X(:)) * bpp(quantise(X, 17))
 draw(Xq);set(gcf, 'Position',  [0, 0, 256, 256])
 
 %% optimise constant step size
@@ -166,7 +167,7 @@ for step_size_scaling = 0.01:0.01:2
     X6q = quantise(X6, 1.011623547 * step_size_scaling);
     X7q = quantise(X7, 1 * step_size_scaling);
 
-    Z0 = py4dec(Y0q, Y1q, X2q, h);
+    Z0 = py4dec(Y0q, X1q, h);
 
     rms_err = std(X(:) - Z0(:));
     if abs(rms_err - direct_quant_rms_err) < best_diff_rms_err
@@ -194,7 +195,7 @@ X4q = quantise(X4, 4.038922156 * best_step_size_scaling);
 X5q = quantise(X5, 2.022488756 * best_step_size_scaling);
 X6q = quantise(X6, 1.011623547 * best_step_size_scaling);
 X7q = quantise(X7, 1 * best_step_size_scaling);
-Z0 = py4dec(Y0q, Y1q, X2q, h);
+Z0 = py4dec(Y0q, X1q, h);
 
 bits = length(X1q(:)) * bpp(X1q);
 bits = bits + length(Y0q(:)) * bpp(Y0q);

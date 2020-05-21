@@ -59,7 +59,7 @@ for pot_scale = 1:0.01:2
 end
 
 %% optimise step size for constant POT scaling
-N = 8;
+N = 4;
 I = length(X);
 C = dct_ii(N);
 t = [(1+N/2):(I-N/2)];
@@ -69,7 +69,8 @@ Xp(t,:) = colxfm(Xp(t,:), Pf);
 Xp(:,t) = colxfm(Xp(:,t)', Pf)';
 Y = colxfm(colxfm(Xp,C)',C)';
 
-direct_quant_rms_err = 4.9340;
+direct_quant_rms_err = 4.8759;  % bridge
+% direct_quant_rms_err = 4.9340;  % lighthouse
 best_diff_rms_err = 100;
 best_step_size = 0;
 

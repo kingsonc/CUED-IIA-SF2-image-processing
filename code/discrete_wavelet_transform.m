@@ -110,9 +110,9 @@ Z = nlevidwt(Y, 7);
 sqrt(sum(Z(:).^2))
 
 %% quantise
-N = 7;
+N = 3;
 Y = nlevdwt(X-128, N);
-[Yq, ~] = quantdwt(Y, N, 0.05);
+[Yq, ~] = quantdwt(Y, N, 0.3);
 
 Z = nlevidwt(Yq, N);
 draw(Z);

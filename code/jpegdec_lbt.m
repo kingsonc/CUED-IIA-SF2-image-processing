@@ -1,4 +1,4 @@
-function Z = jpegdec(vlc, qstep, N, M, freqdepquant, bits, huffval, dcbits, W, H)
+function Z = jpegdec_lbt(vlc, qstep, N, M, freqdepquant, bits, huffval, dcbits, W, H)
 
 % JPEGDEC Decodes a (simplified) JPEG bit stream to an image
 %
@@ -7,8 +7,8 @@ function Z = jpegdec(vlc, qstep, N, M, freqdepquant, bits, huffval, dcbits, W, H
 %
 %  vlc is the variable length output code from jpegenc
 %  qstep is the quantisation step to use in decoding
-%  N is the width of the DCT block (defaults to 8)
-%  M is the width of each block to be coded (defaults to N). Must be an
+%  N is the width of the LBT block (defaults to 4)
+%  M is the width of each block to be coded (defaults to 16). Must be an
 %  integer multiple of N - if it is larger, individual blocks are
 %  regrouped.
 %  if bits and huffval are supplied, these will be used in Huffman decoding
@@ -20,7 +20,7 @@ function Z = jpegdec(vlc, qstep, N, M, freqdepquant, bits, huffval, dcbits, W, H
 %  Z is the output greyscale image
 
 % Presume some default values if they have not been provided
-error(nargchk(2, 9, nargin, 'struct'));
+narginchk(2, 9);
 opthuff = true;
 if (nargin<10)
     H = 256;
@@ -30,16 +30,18 @@ if (nargin<10)
         if (nargin<7)
             opthuff = false;
             if (nargin<5)
-                freqdepquant = false;         
+                freqdepquant = false;
                 if (nargin<4)
                     if (nargin<3)
-                        N = 8;
-                        M = 8;
+                        N = 4;
+                        M = 16;
                     else
                         M = N;
                     end
                 else
-                    if (mod(M, N)~=0) error('M must be an integer multiple of N'); end
+                    if (mod(M, N)~=0) 
+                        error('M must be an integer multiple of N'); 
+                    end
                 end
             end
         end
@@ -53,8 +55,9 @@ if (opthuff)
     disp('Generating huffcode and ehuf using custom tables')
 else
     disp('Generating huffcode and ehuf using default tables')
-    [bits huffval] = huffdflt(1);
+    [bits, huffval] = huffdflt(1);
 end
+
 % Define starting addresses of each new code length in huffcode.
 huffstart=cumsum([1; bits(1:15)]);
 % Set up huffman coding arrays.
@@ -78,18 +81,20 @@ Zq = zeros(H, W);
 t=1:M;
 
 disp('Decoding rows')
-for r=0:M:(H-M),
-    for c=0:M:(W-M),
+for r=0:M:(H-M)
+    for c=0:M:(W-M)
         yq = zeros(M,M);
         
         % Decode DC coef - assume no of bits is correctly given in vlc table.
         cf = 1;
-        if (vlc(i,2)~=dcbits) error('The bits for the DC coefficient does not agree with vlc table'); end
+        if (vlc(i,2)~=dcbits) 
+            error('The bits for the DC coefficient does not agree with vlc table'); 
+        end
         yq(cf) = vlc(i,1) - 2^(dcbits-1);
         i = i + 1;
         
         % Loop for each non-zero AC coef.
-        while any(vlc(i,:) ~= eob),
+        while any(vlc(i,:) ~= eob)
             run = 0;
             
             % Decode any runs of 16 zeros first.
@@ -104,9 +109,8 @@ for r=0:M:(H-M),
             i = i + 1;
             
             % Decode amplitude of AC coef.
-            if vlc(i,2) ~= si,
+            if vlc(i,2) ~= si
                 error('Problem with decoding .. you might be using the wrong bits and huffval tables');
-                return
             end
             ampl = vlc(i,1);
             
@@ -121,7 +125,9 @@ for r=0:M:(H-M),
         i = i + 1;
         
         % Possibly regroup yq
-        if (M > N) yq = regroup(yq, M/N); end
+        if (M > N) 
+            yq = regroup(yq, M/N); 
+        end
         Zq(r+t,c+t) = yq;
     end
 end
@@ -133,8 +139,12 @@ else
     Zi=quant2(Zq,qstep,qstep);
 end
 
-fprintf(1, 'Inverse %i x %i DCT\n', N, N);
-C8=dct_ii(N);
-Z=colxfm(colxfm(Zi',C8')',C8');
+fprintf(1, 'Inverse %i x %i LBT\n', N, N);
+C = dct_ii(N);
+[~, Pr] = pot_ii(N);
+t = [(1+N/2):(W-N/2)];
+Z=colxfm(colxfm(Zi',C')',C');
+Z(:,t) = colxfm(Z(:,t)', Pr')'; 
+Z(t,:) = colxfm(Z(t,:), Pr');
 
 return

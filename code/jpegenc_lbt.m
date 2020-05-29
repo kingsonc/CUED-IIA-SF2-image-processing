@@ -1,4 +1,4 @@
-function [vlc bits huffval] = jpegenc(X, qstep, N, M, freqdepquant, opthuff, dcbits)
+function [vlc, bits, huffval] = jpegenc_lbt(X, qstep, N, M, freqdepquant, opthuff, dcbits)
 
 % JPEGENC Encode an image to a (simplified) JPEG bit stream
 %
@@ -7,8 +7,9 @@ function [vlc bits huffval] = jpegenc(X, qstep, N, M, freqdepquant, opthuff, dcb
 %
 %  X is the input greyscale image
 %  qstep is the quantisation step to use in encoding
-%  N is the width of the DCT block (defaults to 8)
-%  M is the width of each block to be coded (defaults to N). Must be an
+%
+%  N is the width of the LBT block (defaults to 4)
+%  M is the width of each block to be coded (defaults to 16). Must be an
 %  integer multiple of N - if it is larger, individual blocks are
 %  regrouped.
 %  if opthuff is true (defaults to false), the Huffman table is optimised
@@ -26,8 +27,10 @@ function [vlc bits huffval] = jpegenc(X, qstep, N, M, freqdepquant, opthuff, dcb
 global huffhist  % Histogram of usage of Huffman codewords.
 
 % Presume some default values if they have not been provided
-narginchk(2, 7);
-if ((nargout~=1) && (nargout~=3)) error('Must have one or three output arguments'); end
+narginchk(2, 6);
+if ((nargout~=1) && (nargout~=3))
+    error('Must have one or three output arguments');
+end
 if (nargin<7)
     dcbits = 8;
     if (nargin<6)
@@ -36,8 +39,8 @@ if (nargin<7)
             freqdepquant = false;
             if (nargin<4)
                 if (nargin<3)
-                    N = 8;
-                    M = 8;
+                    N = 4;
+                    M = 16;
                 else
                     M = N;
                 end
@@ -49,12 +52,24 @@ if (nargin<7)
         end
     end
 end
-if ((opthuff==true) && (nargout==1)) error('Must output bits and huffval if optimising huffman tables'); end
+if ((opthuff==true) && (nargout==1))
+    error('Must output bits and huffval if optimising huffman tables');
+end
 
-% DCT on input image X.
-fprintf(1, 'Forward %i x %i DCT\n', N, N);
-C8=dct_ii(N);
-Y=colxfm(colxfm(X,C8)',C8)';
+% LBT on input image X.
+fprintf(1, 'Forward %i x %i LBT\n', N, N);
+I = length(X);
+C = dct_ii(N);
+[Pf, ~] = pot_ii(N);
+t = [(1+N/2):(I-N/2)];
+
+% POT pre-filter
+Xp = X;
+Xp(t,:) = colxfm(Xp(t,:), Pf);
+Xp(:,t) = colxfm(Xp(:,t)', Pf)';
+
+% DCT
+Y = colxfm(colxfm(Xp,C)',C)';
 
 % Quantise to integers.
 fprintf(1, 'Quantising to step size of %i\n', qstep);
@@ -70,7 +85,7 @@ scan = diagscan(M);
 % On the first pass use default huffman tables.
 disp('Generating huffcode and ehuf using default tables')
 [dbits, dhuffval] = huffdflt(1);  % Default tables.
-[huffcode, ehuf] = huffgen(dbits, dhuffval);
+[~, ehuf] = huffgen(dbits, dhuffval);
 
 % Generate run/ampl values and code them into vlc(:,1:2).
 % Also generate a histogram of code symbols.
@@ -79,9 +94,9 @@ sy=size(Yq);
 t = 1:M;
 huffhist = zeros(16*16,1);
 vlc = [];
-for r=0:M:(sy(1)-M),
+for r=0:M:(sy(1)-M)
     vlc1 = [];
-    for c=0:M:(sy(2)-M),
+    for c=0:M:(sy(2)-M)
         yq = Yq(r+t,c+t);
         % Possibly regroup
         if (M > N) yq = regroup(yq, N); end
@@ -112,7 +127,7 @@ end
 % Design custom huffman tables.
 disp('Generating huffcode and ehuf using custom tables')
 [dbits, dhuffval] = huffdes(huffhist);
-[huffcode, ehuf] = huffgen(dbits, dhuffval);
+[~, ehuf] = huffgen(dbits, dhuffval);
 
 % Generate run/ampl values and code them into vlc(:,1:2).
 % Also generate a histogram of code symbols.
@@ -120,12 +135,14 @@ disp('Coding rows (second pass)')
 t = 1:M;
 huffhist = zeros(16*16,1);
 vlc = [];
-for r=0:M:(sy(1)-M),
+for r=0:M:(sy(1)-M)
     vlc1 = [];
-    for c=0:M:(sy(2)-M),
+    for c=0:M:(sy(2)-M)
         yq = Yq(r+t,c+t);
         % Possibly regroup
-        if (M > N) yq = regroup(yq, N); end
+        if (M > N) 
+            yq = regroup(yq, N); 
+        end
         % Encode DC coefficient first
         yq(1) = yq(1) + 2^(dcbits-1);
         dccoef = [yq(1)  dcbits];

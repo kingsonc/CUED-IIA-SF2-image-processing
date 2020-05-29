@@ -1,4 +1,4 @@
-function [Yq, dwtent, bits] = quantdwt(Y, n, step_size)
+function [Yq, dwtent, bits] = quant2_dwt(Y, n, step_size)
 
 % k = 1: top right
 % k = 2: bottom left
@@ -34,7 +34,7 @@ for i=1:n
                 tr = (w/2)+1:w;
                 tc = (w/2)+1:w;
         end
-        Yq(tr,tc) = quantise(Y(tr,tc), dwtstep(k,i));
+        Yq(tr,tc) = quant2(Y(tr,tc), dwtstep(k,i));
         dwtent(k,i) = bpp(Yq(tr,tc));
         bits = bits + bpp(Yq(tr,tc)) * length(tr) * length(tc);
     end
@@ -44,6 +44,6 @@ end
 w = m/(2^n);
 tr = 1:w;
 tc = 1:w;
-Yq(tr,tc) = quantise(Y(tr,tc), dwtstep(1,n+1));
+Yq(tr,tc) = quant2(Y(tr,tc), dwtstep(1,n+1));
 dwtent(1,n+1) = bpp(Yq(tr,tc));
 bits = bits + bpp(Yq(tr,tc)) * length(tr) * length(tc);

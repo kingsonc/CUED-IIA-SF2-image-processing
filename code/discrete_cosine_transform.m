@@ -1,5 +1,5 @@
 %% DCT
-N = 16;
+N = 8;
 C = dct_ii(N);
 % plot(C8');
 

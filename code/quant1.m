@@ -15,5 +15,3 @@ if nargin <= 2, rise1 = step/2; end
 
 % Quantise abs(x) to integer values, and incorporate sign(x)..
 q = max(0,ceil((abs(x) - rise1)/step)) .* sign(x);
-
-

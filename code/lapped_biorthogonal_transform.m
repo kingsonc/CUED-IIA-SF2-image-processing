@@ -2,7 +2,7 @@ N = 4;
 I = length(X);
 
 C = dct_ii(N);
-[Pf, Pr] = pot_ii(N, 1);
+[Pf, Pr] = pot_ii(N);
 t = [(1+N/2):(I-N/2)];
 
 %% POT pre-filter then DCT
@@ -13,7 +13,7 @@ Xp(:,t) = colxfm(Xp(:,t)', Pf)';
 Y = colxfm(colxfm(Xp,C)',C)';
 
 %% inverse DCT then POT post-filter
-Z = colxfm(colxfm(Y',C')',C');
+Z = colxfm(colxfm(Yq',C')',C');
 Zp = Z;
 Zp(:,t) = colxfm(Zp(:,t)', Pr')'; 
 Zp(t,:) = colxfm(Zp(t,:), Pr');

@@ -74,10 +74,12 @@ Y = colxfm(colxfm(Xp,C)',C)';
 % Quantise to integers.
 fprintf(1, 'Quantising to step size of %i\n', qstep);
 if (freqdepquant == true)
-    Yq=quant1_freq_dep(Y,qstep,qstep, M);
+    Yq=quant1_freq_dep(Y,qstep,qstep, N);
 else
     Yq=quant1(Y,qstep,qstep);
 end
+
+fprintf(1, 'Bits from entropy = %f\n', dctbpp(regroup(Yq, N), N));
 
 % Generate zig-zag scan of AC coefs.
 scan = diagscan(M);

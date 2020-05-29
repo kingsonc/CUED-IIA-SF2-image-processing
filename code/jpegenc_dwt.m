@@ -48,7 +48,9 @@ Y = nlevdwt(X-128, N);
 
 % Quantise to integers.
 fprintf(1, 'Quantising to step size scaling of %i\n', qstep);
-[Yq, ~] = quant1_dwt(Y, N, qstep);
+[Yq, ~, entbits] = quant1_dwt(Y, N, qstep);
+
+fprintf(1, 'Bits from entropy = %f\n', entbits);
 
 % Regroup
 Yq = dwtgroup(Yq, N);

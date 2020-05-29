@@ -128,7 +128,7 @@ end
 
 fprintf(1, 'Inverse quantising to step size of %i\n', qstep);
 if (freqdepquant == true)
-    Zi=quant2_freq_dep(Zq,qstep,qstep, M);
+    Zi=quant2_freq_dep(Zq,qstep,qstep, N);
 else
     Zi=quant2(Zq,qstep,qstep);
 end

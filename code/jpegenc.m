@@ -1,4 +1,4 @@
-function [vlc bits huffval] = jpegenc(X, qstep, N, M, freqdepquant, opthuff, dcbits)
+function [vlc, bits, huffval] = jpegenc(X, qstep, N, M, freqdepquant, opthuff, dcbits)
 
 % JPEGENC Encode an image to a (simplified) JPEG bit stream
 %
@@ -59,10 +59,12 @@ Y=colxfm(colxfm(X,C8)',C8)';
 % Quantise to integers.
 fprintf(1, 'Quantising to step size of %i\n', qstep);
 if (freqdepquant == true)
-    Yq=quant1_freq_dep(Y,qstep,qstep, M);
+    Yq=quant1_freq_dep(Y,qstep,qstep, N);
 else
     Yq=quant1(Y,qstep,qstep);
 end
+
+fprintf(1, 'Bits from entropy = %f\n', dctbpp(regroup(Yq, N), N));
 
 % Generate zig-zag scan of AC coefs.
 scan = diagscan(M);

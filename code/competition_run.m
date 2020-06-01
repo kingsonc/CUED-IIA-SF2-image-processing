@@ -25,4 +25,4 @@ X = double(X);
 fprintf(1, 'RMS error %f\n', std(X(:) - Z(:)));
 fprintf(1, 'SSIM %f\n', SSim(Z,X,false));
 
-draw(Z);set(gcf, 'Position',  [0, 0, 256, 256])
+draw(beside(X,Z));

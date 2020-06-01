@@ -59,9 +59,9 @@ Y=colxfm(colxfm(X,C8)',C8)';
 % Quantise to integers.
 fprintf(1, 'Quantising to step size of %i\n', qstep);
 if (freqdepquant == true)
-    Yq=quant1_freq_dep(Y,qstep,qstep, N);
+    Yq=quant1_freq_dep(Y,qstep,0.8*qstep, N);
 else
-    Yq=quant1(Y,qstep,qstep);
+    Yq=quant1(Y,qstep,0.8*qstep);
 end
 
 fprintf(1, 'Bits from entropy = %f\n', dctbpp(regroup(Yq, N), N));

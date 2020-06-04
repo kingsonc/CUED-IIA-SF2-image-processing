@@ -6,7 +6,14 @@ function [Yq, dwtent, bits] = quant2_dwt(Y, n, step_size)
 
 m = length(Y);
 
-dwtstep_equal_mse = stepMX_dwt_emse(n);
+% dwtstep_equal_mse = stepMX_dwt_emse(n);
+
+dwtstep_equal_mse = [
+    [11.5984 7.5636 4.1248 2.1118 1.0623 1.1285]
+    [11.5984 7.5636 4.1248 2.1118 1.0623 0]
+    [8.3777 6.5318 3.7968 1.9788 1.0000 0]
+    ];
+
 dwtstep = dwtstep_equal_mse * step_size;  % Equal MSE
 
 dwtent = zeros(3, n+1);
